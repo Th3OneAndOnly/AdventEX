@@ -118,12 +118,8 @@ Also defining 'attachedTo' to 'room.eastWall' can let you attach things to the w
 
 Some other classes:
 
-Script - Run all the things!
-Set it's 'run()' method, and run it somewhere else to run the Script. There's not much more than that.
-Note: You can include parameters to pass into it.
-
 RunningScript - Wash & repeat!
-Very similar to a list, but it does NOT allow parameters passed into it. You CAN set 'runEvery' 
+A script that runs. Override it's run() propertyIt does NOT allow parameters passed into it. You CAN set 'runEvery' 
 to something other than nil to make it run every amount of turns.
 
 ActorScript - For those alive things!
@@ -153,7 +149,7 @@ Burnable - YET ANOTHER MIX-IN, this is something that can be burned by fire, eit
                          rendering the object completely useless. Careful with this!
 
 Freezeable - With this mix-in class, this is something that can be frozen (and thus made un-useable)
-                        and thawed (made re-usable, presumably.
+                        and thawed (made re-usable).
 
 
 Materials:
@@ -184,7 +180,7 @@ Every room, assumably has a door/passage. If not, it has a sense-connector.
 (realistically it doesn't have to - but then why would you define seperate rooms?)
 Then, why do we have to make TWO objects for EVERY single connection between rooms? 
 It just sounds like a lot of uneeded work. So, let's do all that work in a class so 
-you don't have to.
+I don't have to. Wait...
 
 So, we have a 'eastDoor : Door' or 'eastPassage : Passage' with every direction
 of course, and if you don't want to define these, you can use
@@ -208,10 +204,10 @@ Unthing? Really? Should be Nothing. In fact, there's different contexts of nothi
 there's a slight 'memory' in things the player should have. IN FACT, they should directly
 recall the previous room's state. And in fact, they should do here.
 
-This would remove of 'Unthing' (or make it obsolete), but purpose and execution is moved to Nothing 
+This would remove 'Unthing' (or make it obsolete), but purpose and execution is moved to Abscence 
 class, an ENTIRELY new class not based upon 'Thing', as it is NOT a Thing, the very opposite of Thing.
 
-Of Nothing:
+The class list goes:
 
 Nothing
     Abscence
@@ -232,7 +228,7 @@ Abscence in it's place, to let the player know it was there.
 Prescence - Just as useful; it's an Un-unthing
 A Prescence is where an object WILL be, same as Abscence, just opposite. A use for this is
 if you, for example, had a port, and a ship would be coming in a few turns, you can use 
-this class to let the player examine where to ship would be without returning "'ship' isn't 
+this class to let the player examine where the ship would be without returning "'ship' isn't 
 used in this context" or whatever.
 
 Knowledge - The brain, that's what!
