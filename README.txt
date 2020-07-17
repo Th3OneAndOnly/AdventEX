@@ -1,11 +1,10 @@
 Plans for 
                Basic Lib - The simpler, but more powerful TADS.
 
-Minus Signs:
+Attachment:
 
-'-' signs -- We should be able to use em'! Get rid of the 'Attachable' Class, 
-and replace it with this! The minus signs signify 'attachment', which is 
-different then containment.
+Hopefully I might be able to simplify Attachment a bit with some common 
+properties.
 
 Containment                          v|s.                          Attachment
 --------------------------------------|--------------------------------------
@@ -26,13 +25,17 @@ metalbox : Openable, Container 'metal box' 'metal box'
     "Metal! Box! Metal box!"
 ;
 
-- redButton : Button 'red button' 'button'
-    "It's red, and round."
-;
 
 + circuits : Fixture 'circuits' 'mess of circuits'
     "They're all multi-colored...it kinda hurts your eyes."
 ;
+
+redButton : Button 'red button' 'button'
+    "It's red, and round."
+    allowAttachment = true
+    attachedTo = metalbox
+;
+    
 
 
 An example of this can be found in the following dialog:
