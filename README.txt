@@ -86,7 +86,7 @@ Common Classes:
 There are many common objects that are unique in the world - why aren't they in adv3?
 Such as a table - you should be able to put stuff on and under it, but then you need 
 to make an entire Complex Container -- why? Why isn't there a Table class that does this?
-Well there is now!
+Here are some that make sense to me:
 
 * Table - Can put stuff on and under; by default it's umoveable.
 * Sofa - Variant of Chair, specifies an 'actorBulk' property that defines how many actors 
@@ -105,13 +105,7 @@ Well there is now!
                   (Without attachment)
 * (mix-in) Tall - Disallows putting things on top either completely or conditionally.
 * (mix-in) Low - Disallows putting things below either completely or conditionally.
-* (mix-in) Burnable - Something that can be burned by fire, either turning into char, or
-                      simply being shown as burned, or being too hot to handle. 
-     - 'meltable = true' this is set to nil by default, but if enabled the object will
-                         melt instead of burn, changing descriptions a little bit and
-                         rendering the object completely useless. Careful with this!
-* (mix-in) Freezeable - Something that can be frozen (and thus made un-useable)
-                        and thawed, presumably.
+
 
 
 
@@ -133,12 +127,36 @@ ActorScript - For those alive things!
 Same as a Script, but it's for actors. Try run(actor), instead.
 Well, you can use 'linkActor' to link an Actor to this, and 'runEvery' to run the script, as well.
 
+Transformer - A useful object changer
+A Transformer is a mix-in class that allows an object to be transformed - that is, CHANGED into 
+another type of object. It remains the same object, just changed. It can, however, use a reference
+object to transform into.
+
+Breakable - Another useful object changer
+A Breakable (mix-in) is an object that can be broken. Much like Transformer, it extends from that. But, it differs
+in that you never specify a seperate object - it just displays as 'broken'. For example, a glass jar 
+will turn into a (broken) glass jar when (whatever).makeBroken(true) is called. Note this means an object
+can be 'unbroken', i.e. by using tape or whatever you program into there.
+
+RestrictedAttachment - Refridgerator magnets!
+Another mix-in, and this makes it so you can restrict what kinds of objects can be attached on here.
+Note this automatically sets allowAttachment to true, predictably.
+
+Burnable - YET ANOTHER MIX-IN, this is something that can be burned by fire, either turning into char, or
+                      simply being shown as burned, or being too hot to handle. 
+
+           - 'meltable = true' this is set to nil by default, but if enabled the object will
+                         melt instead of burn, changing descriptions a little bit and
+                         rendering the object completely useless. Careful with this!
+
+Freezeable - With this mix-in class, this is something that can be frozen (and thus made un-useable)
+                        and thawed (made re-usable, presumably.
 
 
 Materials:
 So in adv3, we have SenseConnectors which have a 'material', which defines what senses can be sensed 
 through. This works well, but the lack of partial senses and materials availble for Things is shown 
-in some cases. So, it's fixed! Material is a modified class in which you can specify a material,
+in some cases. So, it should be fixed! Material could be a modified class in which you could specify a material,
 which has a couple properties:
 'senseThrough' - the list of senses this material lets through. Ex.: [sight, partialSmell]
 'soundHardness' - the extra 'oomph' it gives a sound. Values of 1 mean that the sound is the same as 
@@ -179,15 +197,16 @@ if you want.
 
 Common properties - Objects:
 
+// I had something... I forgot. But, it's good to keep the section here!
 
 Nothing:
 
 Unthing? Really? Should be Nothing. In fact, there's different contexts of nothing. In fact,
 there's a slight 'memory' in things the player should have. IN FACT, they should directly
-recall the previous room's state. And in fact, they do.
+recall the previous room's state. And in fact, they should do here.
 
-Removal of 'Unthing', but purpose and execution is moved to Nothing class, an ENTIRELY new 
-class not based upon 'Thing', as it is NOT a Thing, the very opposite of Thing.
+This would remove of 'Unthing' (or make it obsolete), but purpose and execution is moved to Nothing 
+class, an ENTIRELY new class not based upon 'Thing', as it is NOT a Thing, the very opposite of Thing.
 
 Of Nothing:
 
@@ -224,24 +243,6 @@ Not inheritly useful, but good for some edge cases.
 Memory - This is like Knowledge, but for YOU!
 This is Knowledge, but adapted for the player. Note Memory handles both knowing and unlearning things, 
 so keep that in mind.
-
-
-New classes:
-
-Transformer - A useful object changer
-A Transformer is a mix-in class that allows an object to be transformed - that is, CHANGED into 
-another type of object. It remains the same object, just changed. It can, however, use a reference
-object to transform into.
-
-Breakable - Another useful object changer
-A Breakable (mix-in) is an object that can be broken. Much like Transformer, it extends from that. But, it differs
-in that you never specify a seperate object - it just displays as 'broken'. For example, a glass jar 
-will turn into a (broken) glass jar when (whatever).makeBroken(true) is called. Note this means an object
-can be 'unbroken', i.e. by using tape or whatever you program into there.
-
-RestrictedAttachment - Refridgerator magnets!
-Another mix-in, and this makes it so you can restrict what kinds of objects can be attached on here.
-Note this automatically sets allowAttachment to true, predictably.
 
 
 
