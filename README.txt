@@ -1,7 +1,7 @@
 Plans for 
                Basic Lib - The simpler, but more powerful TADS.
 
-Minus Signs --
+Minus Signs:
 
 '-' signs -- We should be able to use em'! Get rid of the 'Attachable' Class, 
 and replace it with this! The minus signs signify 'attachment', which is 
@@ -68,6 +68,9 @@ The metal box is in the location called 'Room'
 
 > ZARVO BUTTON
 The button is in the location called 'Room'
+
+> ZARVO CIRCUITS
+The mess of curcuits is in the location called 'metal box'
 
 > TAKE BUTTON
 You can't take that -- it's attached to the metal box!
