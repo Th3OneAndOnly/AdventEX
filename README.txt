@@ -1,10 +1,11 @@
 Plans for 
                Basic Lib - The simpler, but more powerful TADS.
 
-Attachment:
+Minus Signs:
 
-Hopefully I might be able to simplify Attachment a bit with some common 
-properties.
+'-' signs -- We should be able to use em'! Get rid of the 'Attachable' Class, 
+and replace it with this! The minus signs signify 'attachment', which is 
+different then containment.
 
 Containment                          v|s.                          Attachment
 --------------------------------------|--------------------------------------
@@ -25,17 +26,13 @@ metalbox : Openable, Container 'metal box' 'metal box'
     "Metal! Box! Metal box!"
 ;
 
+- redButton : Button 'red button' 'button'
+    "It's red, and round."
+;
 
 + circuits : Fixture 'circuits' 'mess of circuits'
     "They're all multi-colored...it kinda hurts your eyes."
 ;
-
-redButton : Button 'red button' 'button'
-    "It's red, and round."
-    allowAttachment = true
-    attachedTo = metalbox
-;
-    
 
 
 An example of this can be found in the following dialog:
@@ -97,8 +94,6 @@ Here are some that make sense to me:
 * Table - Can put stuff on and under; by default it's umoveable.
 * Sofa - Variant of Chair, specifies an 'actorBulk' property that defines how many actors 
          can sit on it.
-* Dresser - Contains an amount of drawers, which are (optionally) detachable containers 
-            themselves. Also a surface, and something you can put stuff under and behind.
 * Cabinet - Ideally something you can put stuff under, behind, or in, but it's too high to
             put stuff on it.
 * TallTable - Refers to an object where it's too tall (or inaccessible) to put things on top,
@@ -247,4 +242,32 @@ This is Knowledge, but adapted for the player. Note Memory handles both knowing 
 so keep that in mind.
 
 
+Knowledge - REVAMP:
 
+So each Knowledge object is for actors, and has a [knows] list and a [preKnows] list. The knows list is the 
+list of everything the actor knows, similar to actor.isKnown(obj). The preKnows list is the 'subconscious'
+of the actor. Something must be in preKnows before it can be in knows. actor.delegate(obj) adds the obj to 
+preKnows, and actor.learn(obj) sends it from preKnows to knows. 
+
+If autoForget is on, after attentionSpan * 2 turns, known things that were not initially set 
+(by explicity writing it in code) are sent to preKnowsand stays there. Things initially set in 
+preKnows, however, when learned don't become forgotten. Alternatively, defining a topic/obj as 
+{important = true} makes sure NO actor will forget it when learned.Calling actor.forget(obj) sends that 
+obj from knows into preKnows -- using this on not known objects is fine. Calling actor.amnesia(obj) sends 
+that obj from preKnows OR knows out of the Knowledge obj, effectively removing it from the actor's mind. 
+This is never called by default -- they'd normally end up in preKnows.
+
+Why is this useful? Immersion, my dear Watson. Immersion. If the player is human, they naturally forget
+things. So, why not the actors? As well as, this can be as simple as the old 'isKnown' as before. 
+Also, a Knowledge object works with MultiLoc, meaning you can define COMMON/SHARED knowledge, as well.
+
+I have NO idea how Dynamic Knowledge objects would work. That's a whole meta I kinda don't wanna touch.
+
+
+Ignorance - Seems useless:
+It's for an object who you want as the opposite of important. Every turn this is in an actor's knowledge,
+it removes itself from they're knows list. If useless is true, then it removes itself from preKnows as well.
+
+Memory:
+It's exactly like knowledge, like the tag line above, but is not intended for actors. You can use these to
+switch the player's knowledge, or just track of it. Usefull if you really wanna override the brain system.
