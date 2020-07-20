@@ -1,9 +1,17 @@
 #charset "us-ascii"
 #include <adv3.h>
 #include <en_us.h>
-
+/* 
+ *   This next set of classes define the important stuff for GeneralBox. They
+ *   are also useful in your own code, if you want to shorten up object
+ *   definitions a bit.
+ */
 class ComplexSurface : ComplexComponent, Surface
-     iobjFor(PutOn) {
+    /* 
+     *   The PutOn action. We check our allowOn with the object we wanna put in
+     *   us, and if it doesn't pass, fail it with our failMsg.
+     */
+    iobjFor(PutOn) {
         verify() { 
             if(targetObj.allowOn(gDobj)) { 
                 logical; }
@@ -13,6 +21,10 @@ class ComplexSurface : ComplexComponent, Surface
     }
 ;
 class ComplexUnderside : ComplexComponent, Underside
+    /* 
+     *   The PutUnder action. We check our allowUnder with the object we wanna
+     *   put in us, and if it doesn't pass, fail it with our failMsg.
+     */
     iobjFor(PutUnder) {
         verify() { 
             if(targetObj.allowUnder(gDobj)) { 
@@ -23,6 +35,10 @@ class ComplexUnderside : ComplexComponent, Underside
     }
 ;
 class ComplexRearContainer : ComplexComponent, RearContainer
+    /* 
+     *   The PutBehind action. We check our allowBehind with the object we wanna
+     *   put in us, and if it doesn't pass, fail it with our failMsg.
+     */
     iobjFor(PutBehind) {
         verify() { 
             if(targetObj.allowBehind(gDobj)) {
@@ -33,6 +49,9 @@ class ComplexRearContainer : ComplexComponent, RearContainer
     }
 ;
 class ComplexRearSurface : ComplexComponent, RearSurface
+    /* 
+     *   We do the same as the container up above.
+     */
     iobjFor(PutBehind) {
         verify() { 
             if(targetObj.allowBehind(gDobj)) {
@@ -42,6 +61,7 @@ class ComplexRearSurface : ComplexComponent, RearSurface
         }
     }
 ;
+/* We don't mess with Containers as they define most things we need anyway. */
 class ComplexInnerContainer : ComplexComponent, Container
 ;
 class RestrictInnerContainer : ComplexComponent, RestrictedContainer
@@ -150,8 +170,14 @@ class FloorCabinet : ComplexContainer, Heavy
     allowUnder(obj) { return true; }
 ;
 
-
+/* 
+ *   A GeneralBox is a class where the author can define exactly which of it's
+ *   containers are active at any given time to any given object. It's very
+ *   useful for many situations where you want to define a custom object like a
+ *   print scanner, or something else.
+ */
 class GeneralBox : ComplexContainer, Heavy
+    /* This is standard */
     subRear = perInstance(new ComplexRearContainer())
     subUnderside = perInstance(new ComplexUnderside())
     subContainer = perInstance(new ComplexInnerContainer())
@@ -173,7 +199,12 @@ class GeneralBox : ComplexContainer, Heavy
     
     
     contentsListed = nil
-    
+    /* 
+     *   These are just initially set to nil. The other furniture pieces aren't
+     *   meant to be messed with (as they exist purely to tidy up and shorten
+     *   code) but these are made to be changed. As such, we need messages to
+     *   send to the player on fail.
+     */
     allowBehind(obj) { return nil; }
     allowOn(obj) { return nil; }
     allowUnder(obj) { return nil; }
