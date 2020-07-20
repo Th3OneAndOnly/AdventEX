@@ -3,14 +3,48 @@
 #include <en_us.h>
 
 class ComplexSurface : ComplexComponent, Surface
+     iobjFor(PutOn) {
+        verify() { 
+            if(targetObj.allowOn(gDobj)) { 
+                logical; }
+            else { 
+                illogical(targetObj.failOnMsg); }
+        }
+    }
 ;
 class ComplexUnderside : ComplexComponent, Underside
+    iobjFor(PutUnder) {
+        verify() { 
+            if(targetObj.allowUnder(gDobj)) { 
+                logical; }
+            else { 
+                illogical(targetObj.failUnderMsg); }
+        }
+    }
 ;
 class ComplexRearContainer : ComplexComponent, RearContainer
+    iobjFor(PutBehind) {
+        verify() { 
+            if(targetObj.allowBehind(gDobj)) {
+                logical; }
+            else { 
+                illogical(targetObj.failBehindMsg); }
+        }
+    }
 ;
 class ComplexRearSurface : ComplexComponent, RearSurface
+    iobjFor(PutBehind) {
+        verify() { 
+            if(targetObj.allowBehind(gDobj)) {
+                logical; }
+            else { 
+                illogical(targetObj.failBehindMsg); }
+        }
+    }
 ;
 class ComplexInnerContainer : ComplexComponent, Container
+;
+class RestrictInnerContainer : ComplexComponent, RestrictedContainer
 ;
 
 
@@ -40,6 +74,10 @@ class Table : ComplexContainer, Heavy
      *   the transcript.
      */
     contentsListed = nil
+    
+    allowBehind(obj) { return true; }
+    allowOn(obj) { return true; }
+    allowUnder(obj) { return true; }
 ;
 
 
@@ -61,6 +99,10 @@ class Cabinet : ComplexContainer, Heavy
         inherited();
     }
     contentsListed = nil
+    
+    allowBehind(obj) { return true; }
+    allowOn(obj) { return true; }
+    allowUnder(obj) { return true; }
 ;
 
 /* 
@@ -78,6 +120,10 @@ class TallTable : ComplexContainer, Heavy
         inherited();
     }
     contentsListed = nil
+    
+    allowBehind(obj) { return true; }
+    allowOn(obj) { return true; }
+    allowUnder(obj) { return true; }
 ;
 
 /* 
@@ -98,6 +144,45 @@ class FloorCabinet : ComplexContainer, Heavy
         inherited();
     }
     contentsListed = nil
+    
+    allowBehind(obj) { return true; }
+    allowOn(obj) { return true; }
+    allowUnder(obj) { return true; }
 ;
 
 
+class GeneralBox : ComplexContainer, Heavy
+    subRear = perInstance(new ComplexRearContainer())
+    subUnderside = perInstance(new ComplexUnderside())
+    subContainer = perInstance(new ComplexInnerContainer())
+    subSurface = perInstance(new ComplexSurface())
+    initializeThing() {
+        subRear.moveInto(self);
+        subSurface.moveInto(self);
+        subContainer.moveInto(self);
+        subUnderside.moveInto(self);
+        subContainer.targetObj = self;
+        subRear.targetObj = self;
+        subSurface.targetObj = self;
+        subUnderside.targetObj = self;
+        
+        
+        inherited();
+        
+    }
+    
+    
+    contentsListed = nil
+    
+    allowBehind(obj) { return nil; }
+    allowOn(obj) { return nil; }
+    allowUnder(obj) { return nil; }
+    failOnMsg = 'You can\'t put that on there. '
+    failBehindMsg = 'You can\'t put that behind there.'
+    failUnderMsg = 'You can\'t put that under there.'
+;
+
+class RestrictedBox : GeneralBox
+    subContainer = perInstance(new RestrictInnerContainer())
+    contentsListed = nil
+;
