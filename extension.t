@@ -252,15 +252,19 @@ class Transformer : Thing
     initializeThing() {
         referenceObj.moveInto(nil);
         referenceObj.targetObj = self;
-        unThing.notHereMsg = '<<referenceObj.theName>> used to be that.';
-        unThing.name = name;
-        unThing.location = nil;
+        if(unThing != nil) {
+            unThing.notHereMsg = '<<referenceObj.theName>> used to be that.';
+            unThing.name = name;
+            unThing.location = nil;
+        }
         inherited();
     }
     transform() {
         referenceObj.moveInto(location);
-        unThing.initializeVocabWith(vocabWords);
-        unThing.moveInto(location);
+        if(unThing != nil) {
+            unThing.initializeVocabWith(vocabWords);
+            unThing.moveInto(location);
+        }
         moveInto(nil);
         self_ = referenceObj;
     }
