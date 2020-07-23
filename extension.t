@@ -1,6 +1,12 @@
 #charset "us-ascii"
 #include <adv3.h>
 #include <en_us.h>
+
+/* ------------------------------------------------------------------------ */
+// FURNITURE CODE
+
+
+
 /* 
  *   This next set of classes define the important stuff for GeneralBox. They
  *   are also useful in your own code, if you want to shorten up object
@@ -67,12 +73,27 @@ class ComplexInnerContainer : ComplexComponent, Container
 class RestrictInnerContainer : ComplexComponent, RestrictedContainer
 ;
 
+/* 
+ *   This is not meant for authors to use in their code -- it's simply a
+ *   convenience class I made for the context of this extension.
+ */
+class ComplexObj_ : ComplexContainer
+    allowBehind(obj) { return true; }
+    allowOn(obj) { return true; }
+    allowUnder(obj) { return true; }
+    failOnMsg = 'You can\'t put that on there. '
+    failBehindMsg = 'You can\'t put that behind there.'
+    failUnderMsg = 'You can\'t put that under there.'
+;
+    
+
+
 
 /*
  *   A basic Table, where you can put stuff on and under, and by default it's
  *   umoveable.
  */
-class Table : ComplexContainer, Heavy
+class Table : ComplexObj_
     /* 
      *   Define our subSurface and subUnderside as perInstance objects
      */
@@ -94,10 +115,6 @@ class Table : ComplexContainer, Heavy
      *   the transcript.
      */
     contentsListed = nil
-    
-    allowBehind(obj) { return true; }
-    allowOn(obj) { return true; }
-    allowUnder(obj) { return true; }
 ;
 
 
@@ -105,7 +122,7 @@ class Table : ComplexContainer, Heavy
  *   A Cabinet is an object where you can put stuff under, behind, or in, but
  *   it's too high to put stuff on it.
  */
-class Cabinet : ComplexContainer, Heavy
+class Cabinet : ComplexObj_
     subRear = perInstance(new ComplexRearContainer())
     subUnderside = perInstance(new ComplexUnderside())
     subContainer = perInstance(new ComplexInnerContainer())
@@ -119,17 +136,13 @@ class Cabinet : ComplexContainer, Heavy
         inherited();
     }
     contentsListed = nil
-    
-    allowBehind(obj) { return true; }
-    allowOn(obj) { return true; }
-    allowUnder(obj) { return true; }
 ;
 
 /* 
  *   A TallTable refers to an object where it's too tall (or inaccessible) to
  *   put things on top, but you can place things below or behind.
  */
-class TallTable : ComplexContainer, Heavy
+class TallTable : ComplexObj_
     subRear = perInstance(new ComplexRearContainer())
     subUnderside = perInstance(new ComplexUnderside())
     initializeThing() {
@@ -140,17 +153,13 @@ class TallTable : ComplexContainer, Heavy
         inherited();
     }
     contentsListed = nil
-    
-    allowBehind(obj) { return true; }
-    allowOn(obj) { return true; }
-    allowUnder(obj) { return true; }
 ;
 
 /* 
  *   FloorCabinet - An object that allows things in, on, or behind, but not
  *   under.
  */
-class FloorCabinet : ComplexContainer, Heavy
+class FloorCabinet : ComplexObj_
     subRear = perInstance(new ComplexRearContainer())
     subContainer = perInstance(new ComplexInnerContainer())
     subSurface = perInstance(new ComplexSurface())
@@ -164,10 +173,6 @@ class FloorCabinet : ComplexContainer, Heavy
         inherited();
     }
     contentsListed = nil
-    
-    allowBehind(obj) { return true; }
-    allowOn(obj) { return true; }
-    allowUnder(obj) { return true; }
 ;
 
 /* 
@@ -176,7 +181,7 @@ class FloorCabinet : ComplexContainer, Heavy
  *   useful for many situations where you want to define a custom object like a
  *   print scanner, or something else.
  */
-class GeneralBox : ComplexContainer, Heavy
+class GeneralBox : ComplexObj_
     /* This is standard */
     subRear = perInstance(new ComplexRearContainer())
     subUnderside = perInstance(new ComplexUnderside())
@@ -217,3 +222,70 @@ class RestrictedBox : GeneralBox
     subContainer = perInstance(new RestrictInnerContainer())
     contentsListed = nil
 ;
+
+class Sofa : Chair
+    maxActors = 3
+    tooFullMsg = 'The {the dobj/him} can\'t fit any more people.'
+    dobjFor(SitOn) {
+        verify() { 
+            if(contents.length() + 1 > maxActors && gDobj.ofType(Actor))
+                illogical(tooFullMsg);
+            else
+                inherited();
+        }
+    }
+    maxSingleBulk = 20
+;
+
+/* ---------------------------------------------------------------------- */
+// EXTRA CLASSES CODE
+
+
+//class Transformer : Thing
+//    referenceObj = nil
+//    initializeThing() {
+//        referenceObj.moveInto(nil);
+//        referenceObj.targetObj = self;
+//        inherited();
+//    }
+//    transform() {
+//        referenceObj.moveInto(location);
+//        moveInto(nil);
+//        selfPointer = referencePointer;
+//    }
+//    selfPointer = &(self)
+//    referencePointer = &(referenceObj)
+//;
+
+class RunningScript : object
+    run() { }
+    runEvery = 1
+    daemonID = nil
+    beforeAction() {
+        if(daemonID == nil)
+            daemonID = perInstance(new Daemon(self, &run, runEvery));
+    }
+    endDaemon() {
+        if(daemonID != nil)
+            daemonID.removeEvent();
+        daemonID = nil;
+    }
+;
+
+
+/* ---------------------------------------------------------------------- */
+// Knowledge
+
+
+
+
+
+
+
+
+
+
+
+
+
+
