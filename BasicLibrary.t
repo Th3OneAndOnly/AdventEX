@@ -121,7 +121,7 @@ startRoom: Room 'Start Room'
 ;
 
 + cube : Transformer 'cube' 'cube'
-    "It's a cube."
+    "It's a cube. <<script1.end()>>"
     dobjFor(Examine) {
         action() { inherited(); self.transform(); }
     }
@@ -135,8 +135,10 @@ sphere : Thing 'sphere' 'sphere'
 
 script1 : RunningScript
     run() {
-        book.desc = "<<one of>>Woah!<<or>>Oops!<<at random>>";
+        "Hey!";
+        return 'Hey!';
     }
+    runEvery = 3
 ;
 
 
