@@ -271,19 +271,23 @@ class Transformer : Thing
     unThing = perInstance(new Unthing())
 ;
 
+globalTurn : Thing
+    initializeThing() {
+        forEachInstance(RunningScript, {obj: obj.daemonID = new Daemon(obj, obj.runProp, obj.runEvery)});
+    }
+;
+
 class RunningScript : object
     run() { }
+    runProp = &run
     runEvery = 1
     daemonID = nil
-    beforeAction() {
-        if(daemonID == nil)
-            daemonID = perInstance(new Daemon(self, &run, runEvery));
-    }
     endDaemon() {
         if(daemonID != nil)
             daemonID.removeEvent();
         daemonID = nil;
     }
+    end() { endDaemon(); }
 ;
 
 
