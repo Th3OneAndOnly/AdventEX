@@ -100,12 +100,8 @@ Here are some that make sense to me:
               but you can place things below or behind.
 * FloorCabinet - An object that allows things in, on, or behind, but not under.
 * GeneralBox - An object that you can place things in, on, behind, and under. 
-               I reccomend using one of the mix-in classes below.
+               I reccomend using some of the custom functions.
 * RestrictedBox - A Box but using RestrictedContainer.
-* (mix-in) Thin - Disallows putting things behind either completely or conditionally. 
-                  (Without attachment)
-* (mix-in) Tall - Disallows putting things on top either completely or conditionally.
-* (mix-in) Low - Disallows putting things below either completely or conditionally.
 
 
 
@@ -117,7 +113,7 @@ Also defining 'attachedTo' to 'room.eastWall' can let you attach things to the w
 Some other classes:
 
 RunningScript - Wash & repeat!
-A script that runs. Override it's run() propertyIt does NOT allow parameters passed into it. You CAN set 'runEvery' 
+A script that runs. Override it's run() property. It does NOT allow parameters passed into it. You CAN set 'runEvery' 
 to something other than nil to make it run every amount of turns.
 
 ActorScript - For those alive things!
@@ -196,44 +192,22 @@ Common properties - Objects:
 
 // I had something... I forgot. But, it's good to keep the section here!
 
-Nothing:
+Knowledge Classes:
 
-Unthing? Really? Should be Nothing. In fact, there's different contexts of nothing. In fact,
-there's a slight 'memory' in things the player should have. IN FACT, they should directly
-recall the previous room's state. And in fact, they should do here.
+Knowledge
+Important
+    Trival
+Memory
 
-This would remove 'Unthing' (or make it obsolete), but purpose and execution is moved to Abscence 
-class, an ENTIRELY new class not based upon 'Thing', as it is NOT a Thing, the very opposite of Thing.
-
-The class list goes:
-
-Nothing
-    Abscence
-    Presence
-    Knowledge
-        Ignorance
-    Memory
-
-Nothing - This class is the base class for all.
-All verbs with these objects are in 'where was' such as 'where was the golden banana'
-or 'recall golden banana' as such they are meant for dobjFor(WhereWas) and dobjFor(Recall).
-
-
-Abscence - Same funtionality as Unthing
-An Abscence is where an object ONCE was, as in if something dissapears, you can leave an
-Abscence in it's place, to let the player know it was there.
-
-Prescence - Just as useful; it's an Un-unthing
-A Prescence is where an object WILL be, same as Abscence, just opposite. A use for this is
-if you, for example, had a port, and a ship would be coming in a few turns, you can use 
-this class to let the player examine where the ship would be without returning "'ship' isn't 
-used in this context" or whatever.
 
 Knowledge - The brain, that's what!
 Mainly to be used for Actors, a Knowledge represents what someone knows in a more fluid way 
 than a bunch of hard-to-track variables.
 
-Ignorance - This is Knowledge at it's worst.
+Important - Remember this, kids!
+Use this to mark objects as important -- more info below.
+
+Trivial - This is Knowledge at it's worst.
 This is for Actors, as well, but it's to 'unlearn' things, or represent initially not knowing something.
 Not inheritly useful, but good for some edge cases.
 
@@ -241,18 +215,15 @@ Memory - This is like Knowledge, but for YOU!
 This is Knowledge, but adapted for the player. Note Memory handles both knowing and unlearning things, 
 so keep that in mind.
 
-
-Knowledge - REVAMP:
-
 So each Knowledge object is for actors, and has a [knows] list and a [preKnows] list. The knows list is the 
 list of everything the actor knows, similar to actor.isKnown(obj). The preKnows list is the 'subconscious'
 of the actor. Something must be in preKnows before it can be in knows. actor.delegate(obj) adds the obj to 
 preKnows, and actor.learn(obj) sends it from preKnows to knows. 
 
 If autoForget is on, after attentionSpan * 2 turns, known things that were not initially set 
-(by explicity writing it in code) are sent to preKnowsand stays there. Things initially set in 
+(by explicity writing it in code) are sent to preKnows and stays there. Things initially set in 
 preKnows, however, when learned don't become forgotten. Alternatively, defining a topic/obj as 
-{important = true} makes sure NO actor will forget it when learned.Calling actor.forget(obj) sends that 
+an Important object makes sure NO actor will forget it when learned. Calling actor.forget(obj) sends that 
 obj from knows into preKnows -- using this on not known objects is fine. Calling actor.amnesia(obj) sends 
 that obj from preKnows OR knows out of the Knowledge obj, effectively removing it from the actor's mind. 
 This is never called by default -- they'd normally end up in preKnows.
