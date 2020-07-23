@@ -228,7 +228,7 @@ class Sofa : Chair
     tooFullMsg = 'The {the dobj/him} can\'t fit any more people.'
     dobjFor(SitOn) {
         verify() { 
-            if(contents.length() + 1 > maxActors && gDobj.ofType(Actor))
+            if(contents.length() + 1 > maxActors && gDobj.ofKind(Actor))
                 illogical(tooFullMsg);
             else
                 inherited();
@@ -240,22 +240,32 @@ class Sofa : Chair
 /* ---------------------------------------------------------------------- */
 // EXTRA CLASSES CODE
 
+// Hopefully won't break everything
+modify Thing
+    self_ = self
+;
 
-//class Transformer : Thing
-//    referenceObj = nil
-//    initializeThing() {
-//        referenceObj.moveInto(nil);
-//        referenceObj.targetObj = self;
-//        inherited();
-//    }
-//    transform() {
-//        referenceObj.moveInto(location);
-//        moveInto(nil);
-//        selfPointer = referencePointer;
-//    }
-//    selfPointer = &(self)
-//    referencePointer = &(referenceObj)
-//;
+
+class Transformer : Thing
+    self_ = self
+    referenceObj = nil
+    initializeThing() {
+        referenceObj.moveInto(nil);
+        referenceObj.targetObj = self;
+        unThing.notHereMsg = '<<referenceObj.theName>> used to be that.';
+        unThing.name = name;
+        unThing.location = nil;
+        inherited();
+    }
+    transform() {
+        referenceObj.moveInto(location);
+        unThing.initializeVocabWith(vocabWords);
+        unThing.moveInto(location);
+        moveInto(nil);
+        self_ = referenceObj;
+    }
+    unThing = perInstance(new Unthing())
+;
 
 class RunningScript : object
     run() { }
