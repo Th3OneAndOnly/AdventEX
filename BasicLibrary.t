@@ -79,7 +79,7 @@ startRoom: Room 'Start Room'
     vocabWords = 'bob'
     obeyCommand(fromActor, action) 
     { 
-        if(action.baseActionClass is in (SitOnAction)) 
+        if(action.baseActionClass is in (SitOnAction, GetOffOfAction)) 
             return true; 
         else 
             return inherited(fromActor, action);   
@@ -94,7 +94,7 @@ startRoom: Room 'Start Room'
     vocabWords = 'bobette'
     obeyCommand(fromActor, action) 
     { 
-        if(action.baseActionClass is in (SitOnAction)) 
+        if(action.baseActionClass is in (SitOnAction, GetOffOfAction)) 
             return true; 
         else 
             return inherited(fromActor, action);   
@@ -121,7 +121,7 @@ startRoom: Room 'Start Room'
 ;
 
 + cube : Transformer 'cube' 'cube'
-    "It's a cube. <<script1.end()>>"
+    "It's a <<script3.run('cube')>>. <<script1.end()>>"
     dobjFor(Examine) {
         action() { inherited(); self.transform(); }
     }
@@ -130,16 +130,39 @@ startRoom: Room 'Start Room'
 
 
 sphere : Thing 'sphere' 'sphere'
-    "It's a sphere."
+    "It's a sphere. <<script2.run(script2.targetActor, nil)>>"
 ;
 
 script1 : RunningScript
-    run() {
+    run(isDaemon) {
         "Hey!";
         return 'Hey!';
     }
     runEvery = 3
 ;
 
+script2 : ActorScript
+    run(actor, isDaemon) {
+        if(isDaemon)
+            actor.name = 'not bob';
+        else
+            actor.name = 'not not bob';
+        end();
+    }
+    targetActor = bob
+    runEvery = 2
+;
 
-
+script3 : RunningScript
+    /* 
+     *   It's perfectly legal to pass custom parameters into it, as long as you
+     *   prevent the daemon from running it. Or else it would try to run it with
+     *   the wrong params and you'd get errors/faulty code. Use a seperate
+     *   script object to pass whatever params you choose into it.
+     */
+    run(customParam) {
+        return customParam;
+    }
+    /* This prevents a Daemon from automatically running it. */
+    runEvery = nil
+;
