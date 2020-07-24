@@ -90,8 +90,7 @@ class ComplexObj_ : ComplexContainer
 
 
 /*
- *   A basic Table, where you can put stuff on and under, and by default it's
- *   umoveable.
+ *   A basic Table, where you can put stuff on and under.
  */
 class Table : ComplexObj_
     /* 
@@ -218,11 +217,20 @@ class GeneralBox : ComplexObj_
     failUnderMsg = 'You can\'t put that under there.'
 ;
 
+/* 
+ *   A RestrictedBox is a GeneralBox using a RestrictedContainer instead. It's
+ *   good to use this to make a completely custom object.
+ *
+ */
 class RestrictedBox : GeneralBox
     subContainer = perInstance(new RestrictInnerContainer())
     contentsListed = nil
 ;
 
+/* 
+ *   A Sofa is a Chair that can hold multiple actors, but only a specified
+ *   amount. A little niche, sure.
+ */
 class Sofa : Chair
     maxActors = 3
     tooFullMsg = 'The {the dobj/him} can\'t fit any more people.'
@@ -240,25 +248,61 @@ class Sofa : Chair
 /* ---------------------------------------------------------------------- */
 // EXTRA CLASSES CODE
 
-// Hopefully won't break everything
+/* 
+ *   Give everything a self_ tag just in case you want to loop over every
+ *   object, and it may or may not be a transformer, using obj.self_ still
+ *   works.
+ */
 modify Thing
     self_ = self
 ;
 
-
+/* 
+ *   A Transformer is a class that allows an object to be transformed - that
+ *   is, CHANGED into another type of object. It remains the same object, just
+ *   changed. Use referenceObj to specify what object to transform into.
+ */
 class Transformer : Thing
-    self_ = self
+    /* 
+     *   The reference object is an object that DOES NOT exist in the world, is
+     *   moved into nil then replaces this object when transformed. If the
+     *   object is a Transformer, make sure to use
+     *.  initalizeThing() {
+     *.     inherited();
+     *.     moveInto(wherever you want);
+     *.  }
+     *   Or else it might be flung into nil, never to be seen again. This can be
+     *   useful if that's what you're going for anyway.
+     */
     referenceObj = nil
+    /* 
+     *   The Unthing's notHereMsg and name. This Unthing is left behind when we
+     *   transform, in case you're lazy and don't let the player know it got
+     *   transformed, and the player asks about it.
+     */
+    unThingNotHereMsg = '<<referenceObj.theName>> used to be that.'
+    unThingName = name
+    /* 
+     *   In our initializer, move our reference object into nil, so it doesn't
+     *   exist, and set it's targetObj, if it's a NameAsOther, to us. If we have
+     *   an unThing to leave behind, be sure to initialize it properly.
+     */
     initializeThing() {
         referenceObj.moveInto(nil);
         referenceObj.targetObj = self;
         if(unThing != nil) {
-            unThing.notHereMsg = '<<referenceObj.theName>> used to be that.';
-            unThing.name = name;
+            unThing.notHereMsg = unThingNotHereMsg;
+            unThing.name = unThingName;
             unThing.location = nil;
         }
         inherited();
     }
+    /* 
+     *   Calling this method moves our reference object here, and if we have an
+     *   unThing, move that too, then we move ourselves straight into nil. We
+     *   also redefined our self_ prop to our reference object to ease the
+     *   process of referring to this object's name, properties, and such.
+     */
     transform() {
         referenceObj.moveInto(location);
         if(unThing != nil) {
@@ -271,23 +315,63 @@ class Transformer : Thing
     unThing = perInstance(new Unthing())
 ;
 
+/* 
+ *   This is purely made for RunningScripts, but I guess you can hook into
+ *   globalTurn and do some stuff.
+ */
 globalTurn : Thing
+    /* 
+     *   For each RunningScript, if it has a runEvery property, set it's new
+     *   Daemon. If not, set it's Daemon to nil.
+     */
     initializeThing() {
-        forEachInstance(RunningScript, {obj: obj.daemonID = new Daemon(obj, obj.runProp, obj.runEvery)});
+        forEachInstance(RunningScript, {obj: obj.daemonID = (obj.runEvery ? new Daemon(obj, obj.runProp, obj.runEvery) : nil)});
     }
 ;
 
+/* 
+ *   Wash & repeat! A RunningScript is a script that runs. Override it's run()
+ *   property. It does NOT allow parameters passed into it. You CAN set
+ *   'runEvery' to something other than nil to make it run every amount of
+ *   turns. When running, you usually set 'nil' if you run it manually, because
+ *   it is not being run by the daemon. Internally, this has no effect. But it
+ *   might affect whatever code you write in there.
+ */
 class RunningScript : object
-    run() { }
-    runProp = &run
+    /* 
+     *   The run action that is run by the daemon. Put whatever ou want in here.
+     */
+    run(isDaemon) { }
+    /* Our internal run prop */
+    run_() { run(true); }
+    runProp = &run_
+    /* The interval in which the daemon runs at. */
     runEvery = 1
     daemonID = nil
+    /* Restart the daemon if nessessary. */
+    restartDaemon() {
+        if(daemonID != nil)
+            daemonID = new Daemon(self, runProp, runEvery);
+    }
+    /* End the daemon, it's safe to end an ended Daemon. */
     endDaemon() {
         if(daemonID != nil)
             daemonID.removeEvent();
         daemonID = nil;
     }
+    /* shorthand */
     end() { endDaemon(); }
+;
+
+/* 
+ *   An ActorScript is much like a RunningScript except it runs on a
+ *   targetActor, so it's easier to run a Daemon on an actor.
+ */
+class ActorScript : RunningScript
+    /* Our target actor to run on. */
+    targetActor = nil
+    run(actor, isDaemon) { }
+    run_() { run(targetActor, true); }
 ;
 
 
