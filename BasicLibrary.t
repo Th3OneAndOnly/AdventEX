@@ -120,7 +120,7 @@ startRoom: Room 'Start Room'
     desc = "<<(cube.self_).desc>>"
 ;
 
-+ cube : Transformer 'cube' 'cube'
++ cube : Transformer, Thing 'cube' 'cube'
     "It's a <<script3.run('cube')>>. <<script1.end()>>"
     dobjFor(Examine) {
         action() { inherited(); self.transform(); }
@@ -128,7 +128,21 @@ startRoom: Room 'Start Room'
     referenceObj = sphere
 ;
 
++ pyramid : Transformer, Thing 'pyramid' 'pyramid'
+    "Weird... It seems to shift as you look at it..."
+    dobjFor(Examine) {
+        action() { inherited(); self.transform(); }
+    }
+    referenceObj = triangle
+;
 
+triangle : Transformer, Thing 'triangle' 'triangle'
+    "Weird... It seems to shift as you look at it..."
+    dobjFor(Examine) {
+        action() { inherited(); self.transform(); }
+    }
+    referenceObj = pyramid
+;
 sphere : Thing 'sphere' 'sphere'
     "It's a sphere. <<script2.run(script2.targetActor, nil)>>"
 ;
@@ -141,6 +155,9 @@ script1 : RunningScript
     runEvery = 3
 ;
 
+/* 
+ *   You can make it like a Fuse by using end()
+ */
 script2 : ActorScript
     run(actor, isDaemon) {
         if(isDaemon)
@@ -166,3 +183,16 @@ script3 : RunningScript
     /* This prevents a Daemon from automatically running it. */
     runEvery = nil
 ;
+
+
+/* 
+ *   They can be as simple as this, though note you can't reference it without a
+ *   variable. Is a bit annoying, so I commented it out.
+ */
+//RunningScript
+//    run(isDaemon) {
+//        "I'm being run by a RunningScript!";
+//    }
+//;
+
+
