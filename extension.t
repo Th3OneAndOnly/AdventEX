@@ -253,34 +253,38 @@ class Sofa : Chair
  *   object, and it may or may not be a transformer, using obj.self_ still
  *   works.
  */
-modify Thing
+modify VocabObject
     self_ = self
 ;
 
 /* 
- *   A Transformer is a class that allows an object to be transformed - that
+ *   A Transformable is a class that allows an object to be transformed - that
  *   is, CHANGED into another type of object. It remains the same object, just
  *   changed. Use referenceObj to specify what object to transform into.
  */
-class Transformer : Thing
+class Transformable : object
+    /* 
+     *   Are we transformed? Don't change this in your code -- use
+     *   obj.transform().
+     */
+    transformed = nil
     /* 
      *   The reference object is an object that DOES NOT exist in the world, is
-     *   moved into nil then replaces this object when transformed. If the
-     *   object is a Transformer, make sure to use
-     *.  initalizeThing() {
-     *.     inherited();
-     *.     moveInto(wherever you want);
-     *.  }
-     *   Or else it might be flung into nil, never to be seen again. This can be
-     *   useful if that's what you're going for anyway.
+     *   moved into nil then replaces this object when transformed. 
      */
     referenceObj = nil
+    /*   
+     *   If the object is a Transformable, make sure to set this property, or else
+     *   it might be flung into nil, never to be seen again. That can be useful
+     *   if that's what you're going for anyway.
+     */
+//    baseLocation = location
     /* 
      *   The Unthing's notHereMsg and name. This Unthing is left behind when we
      *   transform, in case you're lazy and don't let the player know it got
      *   transformed, and the player asks about it.
      */
-    unThingNotHereMsg = '<<referenceObj.theName>> used to be that.'
+    unThingNotHereMsg = '\^<<referenceObj.theName>> used to be that.'
     unThingName = name
     /* 
      *   In our initializer, move our reference object into nil, so it doesn't
@@ -288,7 +292,8 @@ class Transformer : Thing
      *   an unThing to leave behind, be sure to initialize it properly.
      */
     initializeThing() {
-        referenceObj.moveInto(nil);
+        if(!referenceObj.ofKind(Transformable))
+            referenceObj.moveInto(nil);
         referenceObj.targetObj = self;
         if(unThing != nil) {
             unThing.notHereMsg = unThingNotHereMsg;
@@ -311,10 +316,67 @@ class Transformer : Thing
         }
         moveInto(nil);
         self_ = referenceObj;
+        transformed = true;
     }
     unThing = perInstance(new Unthing())
+    isMe = (self.self_ == self)
 ;
 
+//class Breakable : object
+//    broken = nil
+//    standardDesc = desc
+//    brokenDesc = '<.p>It\'s broken.'
+//    brokenPrefix = '(broken) '
+//    makeBroken(state) {
+//        local nowName = name;
+//        broken = state;
+//        if(state) {
+//            name = brokenPrefix + nowName;
+//            desc = "<<standardDesc()>><<brokenDesc()>>";
+//            cmdDict.addWord(self, '(broken)', &adjective);
+//            
+//        } else {
+//            name = nowName.findReplace('(broken)', '', ReplaceOnce);
+//            desc = standardDesc;
+//            cmdDict.removeWord(self, '(broken)', &adjective);
+//        }
+//    }
+//;
+
+//class TransformableThing : Transformable, Thing;
+//
+//class Breakable : Transformable
+//    referenceObj = perInstance(new TransformableThing())
+//    baseLocation_ = location
+//    
+//    broken = nil
+//    brokenDesc = '<.p>It\'s broken.'
+//    brokenPrefix = '(broken) '
+//    initializeThing() {
+//        referenceObj.desc = function() {
+//            self.desc();
+//            brokenDesc();
+//        };
+//        referenceObj.name = brokenPrefix + name;
+//        referenceObj.initializeVocabWith(vocabWords);
+//        referenceObj.referenceObj = self;
+//        referenceObj.unThing = nil;
+//        referenceObj.initializeThing();
+//        inherited();
+//        moveInto(baseLocation_);
+//    }
+//    makeBroken(state) {
+//        broken = state;
+//        if(state) {
+//            if(isMe)
+//                transform();
+//        } else {
+//            if(!isMe)
+//                referenceObj.transform();
+//        }
+//    }
+//;
+//
 /* 
  *   This is purely made for RunningScripts, but I guess you can hook into
  *   globalTurn and do some stuff.
@@ -339,10 +401,10 @@ globalTurn : Thing
  */
 class RunningScript : object
     /* 
-     *   The run action that is run by the daemon. Put whatever ou want in here.
+     *   The run action that is run by the daemon. Put whatever you want in here.
      */
     run(isDaemon) { }
-    /* Our internal run prop */
+    /* Our internal run prop. Don't change these. */
     run_() { run(true); }
     runProp = &run_
     /* The interval in which the daemon runs at. */
@@ -353,13 +415,13 @@ class RunningScript : object
         if(daemonID != nil)
             daemonID = new Daemon(self, runProp, runEvery);
     }
-    /* End the daemon, it's safe to end an ended Daemon. */
+    /* End the daemon -- it's safe to end an ended Daemon. */
     endDaemon() {
         if(daemonID != nil)
             daemonID.removeEvent();
         daemonID = nil;
     }
-    /* shorthand */
+    /* Shorthand for endDaemon()*/
     end() { endDaemon(); }
 ;
 
@@ -377,7 +439,6 @@ class ActorScript : RunningScript
 
 /* ---------------------------------------------------------------------- */
 // Knowledge
-
 
 
 
