@@ -120,7 +120,7 @@ startRoom: Room 'Start Room'
     desc = "<<(cube.self_).desc>>"
 ;
 
-+ cube : Transformer, Thing 'cube' 'cube'
++ cube : Transformable, Thing 'cube' 'cube'
     "It's a <<script3.run('cube')>>. <<script1.end()>>"
     dobjFor(Examine) {
         action() { inherited(); self.transform(); }
@@ -128,7 +128,7 @@ startRoom: Room 'Start Room'
     referenceObj = sphere
 ;
 
-+ pyramid : Transformer, Thing 'pyramid' 'pyramid'
++ pyramid : Transformable, Thing 'pyramid' 'pyramid'
     "Weird... It seems to shift as you look at it..."
     dobjFor(Examine) {
         action() { inherited(); self.transform(); }
@@ -136,7 +136,14 @@ startRoom: Room 'Start Room'
     referenceObj = triangle
 ;
 
-triangle : Transformer, Thing 'triangle' 'triangle'
+//+ glassObject : Breakable, Thing 'glass object' 'glass object'
+//    "It's very fragile -- better not drop it."
+//    dobjFor(Drop) {
+//        action() { self.makeBroken(!self.broken); inherited(); }
+//    }
+//;
+
+triangle : Transformable, Thing 'triangle' 'triangle'
     "Weird... It seems to shift as you look at it..."
     dobjFor(Examine) {
         action() { inherited(); self.transform(); }
