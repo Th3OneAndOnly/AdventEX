@@ -28,7 +28,7 @@ startRoom: Room 'Start Room'
     "This is the starting room. "
 ;
 
-+ table : Table 'old first table' 'first table'
++ table : Table, Heavy 'old first table' 'first table'
     "It's a mohogany table."
 ;
 
@@ -37,7 +37,7 @@ startRoom: Room 'Start Room'
     subLocation = &subSurface
 ;
 
-+ cabinet : Cabinet 'cabinet' 'cabinet'
++ cabinet : Cabinet, Fixture 'cabinet' 'cabinet'
     "Cabinet."
 ;
 
@@ -46,7 +46,7 @@ startRoom: Room 'Start Room'
     subLocation = &subUnderside
 ;
 
-+ tallTable : TallTable 'tall table' 'tall table'
++ tallTable : TallTable, Heavy 'tall table' 'tall table'
     "Ornate and grand, it's high in the room."
 ;
 
@@ -71,7 +71,7 @@ startRoom: Room 'Start Room'
     "It's a sofa."
 ;
 
-+ bob : Actor
++ bob : Person
     desc = "It's finally Bob!"
     name = 'bob'
     isProperName = true
@@ -86,7 +86,7 @@ startRoom: Room 'Start Room'
     } 
 ;
 
-+ bobette : Actor
++ bobette : Person
     desc = "It's finally Bobette!"
     name = 'bobette'
     isProperName = true
@@ -101,7 +101,7 @@ startRoom: Room 'Start Room'
     } 
 ;
 
-+ boberella : Actor
++ boberella : Person
     desc = "It's finally Boberella!"
     name = 'boberella'
     isProperName = true
@@ -150,6 +150,20 @@ startRoom: Room 'Start Room'
     }
 ;
 
++ ice : Burnable, Thing 'ice cube' 'ice cube'
+    "ICE!"
+    melted = nil
+    dobjFor(Burn) {
+        verify() { }
+        action() {
+            if(!burnt)
+                makeBurnt(true);
+            else
+                melt();
+        }
+    }
+;
+
 triangle : Transformable, Thing 'triangle' 'triangle'
     "Weird... It seems to shift as you look at it..."
     dobjFor(Examine) {
@@ -157,6 +171,9 @@ triangle : Transformable, Thing 'triangle' 'triangle'
     }
     referenceObj = pyramid
 ;
+
+
+
 sphere : Thing 'sphere' 'sphere'
     "It's a sphere. <<script2.run(script2.targetActor, nil)>>"
 ;
