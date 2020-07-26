@@ -352,6 +352,12 @@ class Breakable : object
      */
     brokenPrefix = '(broken) '
     /* 
+     *   The vocab word added as an adjective when it's broken. Not particularly
+     *   meant for author use, as setting this wrong might lead to F U N K Y
+     *   results.
+     */
+    brokenVocab = '(broken)'
+    /* 
      *   Used for stating stuff like 'the object is broken'. Change this if
      *   you're using broken differently.
      */
@@ -387,7 +393,7 @@ class Breakable : object
                  */
                 name = brokenPrefix + nowName;
                 setMethod(&desc, {: "<<standardDesc()>><<brokenDesc()>>" });
-                cmdDict.addWord(self, '(broken)', &adjective);
+                cmdDict.addWord(self, brokenVocab, &adjective);
                 
             } else {
                 /* 
@@ -399,7 +405,7 @@ class Breakable : object
                  */
                 name = nowName.findReplace(brokenPrefix, '', ReplaceOnce);
                 setMethod(&desc, standardDesc);
-                cmdDict.removeWord(self, '(broken)', &adjective);
+                cmdDict.removeWord(self, brokenVocab, &adjective);
             }
         }
     }
@@ -423,6 +429,95 @@ class Breakable : object
         }
     }
     
+;
+
+/* 
+ *   A Freezeable object is more or less an example of defining a custom use for
+ *   the Breakable class, so you don't have to use Breakable just for breaking
+ *   things.
+ */
+class Freezeable : Breakable
+    /* 
+     *   Make sure to set your description, prefix, vocab word to add, and
+     *   state.
+     */
+    brokenDesc = "<.p>It's frozen."
+    brokenPrefix = '(frozen) '
+    brokenVocab = '(frozen)'
+    brokenState = 'frozen'
+    /* 
+     *   Also make frozen and makeFrozen equivalent to their respective broken
+     *   counterparts.
+     */
+    frozen = broken
+    makeFrozen(state) { makeBroken(state); }
+;
+
+/* 
+ *   A Burnable object is like Freexeable, but if you define it as melted, and
+ *   melt() it, it will become COMPLETEY unusable, as in melted beyond repair.
+ */
+class Burnable : Breakable
+    /* Check whether we HAVE a melted prop and if we're melted. */
+    isMelted = (propDefined(&melted) && melted)
+    /* These all define their props by whether it's melted or not. */
+    brokenDesc = "<.p>It's melted."
+    
+    brokenPrefix = '(burnt) '
+    
+    brokenVocab = '(burnt)'
+    
+    brokenState = 'burnt'
+    /* Set our burnt and makeBurnt() to out counterparts... */
+    burnt = broken
+    
+    makeBurnt(state) { makeBroken(state); }
+    
+    /* 
+     *   We have to redefine makeBroken() to include our melting behavior, so we
+     *   always melt when meant to.
+     */
+    makeBroken(state) {
+        /* 
+         *   If we are meant to melt, always make sure we're melted, as melting
+         *   is intended to be permament.
+         */
+        local nowName = name;
+        if(isMelted) {
+            name = brokenPrefix + nowName;
+            setMethod(&desc, {: "<<brokenDesc()>>" });
+            cmdDict.addWord(self, brokenVocab, &adjective);
+        } else {
+            /* We aren't melting so call our inherited biz. */
+            inherited(state);
+        }
+    }
+    /* 
+     *   If we're melted, and we're invovled with a command, prevent it, as
+     *   melted objects are completely useless. If not, treat it as normal.
+     */
+    beforeAction() {
+        if(isMelted && (gDobj == self || gIobj == self)) { "It's completely melted. Useless!"; exit; }
+        inherited();
+    }
+    /* 
+     *   melt() is like makeburnt while melted is true, but using it this way is
+     *   permanently, usually.
+     */
+    melt() {
+        /* We set everything to it's melted variant. */
+        melted = true;
+        brokenPrefix = '(melted) ';
+        brokenVocab = '(melted)';
+        brokenState = 'melted';
+        /* After we set out variables, reset our vocab and name. */
+        name = nowName.findReplace('(burnt) ', '', ReplaceOnce);
+        cmdDict.removeWord(self, '(burnt)', &adjective);
+        /* Finally, run our break function. */
+        makeBroken(true);
+        /* Set our desc AFTER the break function to effectively replace it. */
+        setMethod(&desc, {: "It's completely melted, and as such you can't make out any detail."});
+    }
 ;
 
 /* 
