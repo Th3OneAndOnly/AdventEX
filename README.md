@@ -11,9 +11,8 @@
 - [Installation](#installation)
 - [Features](#features)
 - [Contributing](#contributing)
-- [Team](#team)
 - [FAQ](#faq)
-- [Support](#support)
+- [Contact](#contact)
 - [License](#license)
 
 
@@ -90,24 +89,11 @@ Go to https://intfiction.org/t/interesting-idea-easier-tads-library-for-new-user
 
 ---
 
-<!-- ## Support
+## Contact
 
-Reach out to me at one of the following places!
-
-- Website at <a href="http://fvcproductions.com" target="_blank">`fvcproductions.com`</a>
-- Twitter at <a href="http://twitter.com/fvcproductions" target="_blank">`@fvcproductions`</a>
-- Insert more social links here.
+Check out my Linktree! https://linktr.ee/209TheOneAndOnly
 
 ---
-
-## Donations (Optional)
-
-- You could include a <a href="https://cdn.rawgit.com/gratipay/gratipay-badge/2.3.0/dist/gratipay.png" target="_blank">Gratipay</a> link as well.
-
-[![Support via Gratipay](https://cdn.rawgit.com/gratipay/gratipay-badge/2.3.0/dist/gratipay.png)](https://gratipay.com/fvcproductions/)
-
-
---- -->
 
 ## License
 
