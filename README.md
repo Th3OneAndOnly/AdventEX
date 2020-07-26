@@ -55,7 +55,7 @@ Go to https://intfiction.org/t/interesting-idea-easier-tads-library-for-new-user
 
 <!-- ## Usage (Optional)
 ## Documentation (Optional) -->
-## Tests (Optional)
+## Tests
 
 - Made using adv3 -- You need this library for it to work!
 
