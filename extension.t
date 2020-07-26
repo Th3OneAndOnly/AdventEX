@@ -253,7 +253,7 @@ class Sofa : Chair
  *   object, and it may or may not be a transformer, using obj.self_ still
  *   works.
  */
-modify VocabObject
+modify Object
     self_ = self
 ;
 
@@ -273,12 +273,6 @@ class Transformable : object
      *   moved into nil then replaces this object when transformed. 
      */
     referenceObj = nil
-    /*   
-     *   If the object is a Transformable, make sure to set this property, or else
-     *   it might be flung into nil, never to be seen again. That can be useful
-     *   if that's what you're going for anyway.
-     */
-//    baseLocation = location
     /* 
      *   The Unthing's notHereMsg and name. This Unthing is left behind when we
      *   transform, in case you're lazy and don't let the player know it got
@@ -318,65 +312,119 @@ class Transformable : object
         self_ = referenceObj;
         transformed = true;
     }
+    /* 
+     *   Set this to nil if you don't want to leave an Unthing behind when we
+     *   transform.
+     */
     unThing = perInstance(new Unthing())
+    /* 
+     *   Is the current object us? Use this in your own code as short-hand.
+     */
     isMe = (self.self_ == self)
 ;
 
-//class Breakable : object
-//    broken = nil
-//    standardDesc = desc
-//    brokenDesc = '<.p>It\'s broken.'
-//    brokenPrefix = '(broken) '
-//    makeBroken(state) {
-//        local nowName = name;
-//        broken = state;
-//        if(state) {
-//            name = brokenPrefix + nowName;
-//            desc = "<<standardDesc()>><<brokenDesc()>>";
-//            cmdDict.addWord(self, '(broken)', &adjective);
-//            
-//        } else {
-//            name = nowName.findReplace('(broken)', '', ReplaceOnce);
-//            desc = standardDesc;
-//            cmdDict.removeWord(self, '(broken)', &adjective);
-//        }
-//    }
-//;
+/* 
+ *   A Breakable object can be broken. For example, a glass jar  will turn into
+ *   a (broken) glass jar when glassJar.makeBroken(true) is called. Note this
+ *   means an object can be 'unbroken', i.e. by using tape or whatever you
+ *   program into there.
+ */
+class Breakable : object
+    /* 
+     *   Are we broken? Never change this directly -- use makeBroken(state) to
+     *   do that.
+     */
+    broken = nil
+    /* 
+     *   Don't change this, as this stores the original desc property of the 
+     *   object.
+     */
+    standardDesc = nil
+    /* 
+     *   This is the little bit tacked on the end of the description when
+     *   broken. DOUBLE QUOTES! P. S.: If you change your desc property, ALWAYS
+     *   call updateStandardDesc() or it will be LOST upon breaking or fixing.
+     */
+    brokenDesc = "<.p>It\'s broken."
+    /* 
+     *   This is the prefix that goes on the beginning of the name of the object
+     *   when broken.
+     */
+    brokenPrefix = '(broken) '
+    /* 
+     *   Used for stating stuff like 'the object is broken'. Change this if
+     *   you're using broken differently.
+     */
+    brokenState = 'broken'
+    /* Set our standardDesc initially. */
+    initializeThing() {
+        standardDesc = getMethod(&desc);
+        inherited();
+    }
+    /* 
+     *   The standard function for making an object broken of fixed. Use
+     *   makeBroken(true) to break it, and makeBroken(nil) to fix it.
+     */
+    makeBroken(state) {
+        /* 
+         *   If we are already at this state, do nothing, as we don't want to
+         *   affect standardDesc mistakenly.
+         */
+        if(broken != state) {
+            /* 
+             *   We are switching states, so first store the name we have now
+             *   for future use.
+             */
+            local nowName = name;
+            /* Set our broken state */
+            broken = state;
+            /* Are we breaking or fixing? */
+            if(state) {
+                /* 
+                 *   We're breaking, so prepend our prefix to our name, and set
+                 *   the desc property to the original + our brokenDesc(). We
+                 *   also add the (broken) vocab to the object for the player.
+                 */
+                name = brokenPrefix + nowName;
+                setMethod(&desc, {: "<<standardDesc()>><<brokenDesc()>>" });
+                cmdDict.addWord(self, '(broken)', &adjective);
+                
+            } else {
+                /* 
+                 *   We are fixing, so find the first instance of our prefix
+                 *   (since it's our prefix, we can assume it would be the first
+                 *   one.) Hopefully you didn't change it in between and mess it
+                 *   up... Then we reset the desc prop and remove the (broken)
+                 *   vocab word.
+                 */
+                name = nowName.findReplace(brokenPrefix, '', ReplaceOnce);
+                setMethod(&desc, standardDesc);
+                cmdDict.removeWord(self, '(broken)', &adjective);
+            }
+        }
+    }
+    
+    /* 
+     *   Simple update our standardDesc, so we can use it while breaking or
+     *   fixing.
+     */
+    updateStandardDesc() {
+        setMethod(&standardDesc, getMethod(&desc));
+    }
+    /* 
+     *   By default, we define any action that defines us as the indirect object
+     *   as unfit for us to use, as we're broken. Customize this at will!
+     */
+    beforeAction() {
+        if(gIobj == self && broken) {
+            gAction.setMessageParams('me', self);
+            "It doesn't work, as {the me/him} is <<brokenState>>.";
+            exit;
+        }
+    }
+    
+;
 
-//class TransformableThing : Transformable, Thing;
-//
-//class Breakable : Transformable
-//    referenceObj = perInstance(new TransformableThing())
-//    baseLocation_ = location
-//    
-//    broken = nil
-//    brokenDesc = '<.p>It\'s broken.'
-//    brokenPrefix = '(broken) '
-//    initializeThing() {
-//        referenceObj.desc = function() {
-//            self.desc();
-//            brokenDesc();
-//        };
-//        referenceObj.name = brokenPrefix + name;
-//        referenceObj.initializeVocabWith(vocabWords);
-//        referenceObj.referenceObj = self;
-//        referenceObj.unThing = nil;
-//        referenceObj.initializeThing();
-//        inherited();
-//        moveInto(baseLocation_);
-//    }
-//    makeBroken(state) {
-//        broken = state;
-//        if(state) {
-//            if(isMe)
-//                transform();
-//        } else {
-//            if(!isMe)
-//                referenceObj.transform();
-//        }
-//    }
-//;
-//
 /* 
  *   This is purely made for RunningScripts, but I guess you can hook into
  *   globalTurn and do some stuff.
