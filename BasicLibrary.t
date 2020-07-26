@@ -136,12 +136,19 @@ startRoom: Room 'Start Room'
     referenceObj = triangle
 ;
 
-//+ glassObject : Breakable, Thing 'glass object' 'glass object'
-//    "It's very fragile -- better not drop it."
-//    dobjFor(Drop) {
-//        action() { self.makeBroken(!self.broken); inherited(); }
-//    }
-//;
++ glassObject : Breakable, Thing 'glass object' 'glass object'
+    "It's very fragile -- better not drop it."
+    dobjFor(Drop) {
+        action() { 
+            makeBroken(!broken); 
+            if(!broken) {
+                setMethod(&desc, {: "Crazy!"});
+                updateStandardDesc();
+            }
+            inherited(); 
+        }
+    }
+;
 
 triangle : Transformable, Thing 'triangle' 'triangle'
     "Weird... It seems to shift as you look at it..."
