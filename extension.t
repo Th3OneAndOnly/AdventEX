@@ -330,6 +330,10 @@ class Transformable : object
  *   program into there.
  */
 class Breakable : object
+    /* Should we append to the desc or replace it? */
+    replaceDesc = nil
+    /* Should we append to the name or replace it? */
+    replaceName = nil
     /* 
      *   Are we broken? Never change this directly -- use makeBroken(state) to
      *   do that.
@@ -362,6 +366,8 @@ class Breakable : object
      *   you're using broken differently.
      */
     brokenState = 'broken'
+    /* Used to store name if needed. */
+    oldName_ = nil
     /* Set our standardDesc initially. */
     initializeThing() {
         standardDesc = getMethod(&desc);
@@ -391,8 +397,15 @@ class Breakable : object
                  *   the desc property to the original + our brokenDesc(). We
                  *   also add the (broken) vocab to the object for the player.
                  */
-                name = brokenPrefix + nowName;
-                setMethod(&desc, {: "<<standardDesc()>><<brokenDesc()>>" });
+                if(!replaceName)
+                    name = brokenPrefix + nowName;
+                else
+                    oldName_ = name;
+                    name = brokenPrefix;
+                if(!replaceDesc)
+                    setMethod(&desc, {: "<<standardDesc()>><<brokenDesc()>>" });
+                else
+                    setMethod(&desc, {: "<<brokenDesc()>>"});
                 cmdDict.addWord(self, brokenVocab, &adjective);
                 
             } else {
@@ -403,7 +416,10 @@ class Breakable : object
                  *   up... Then we reset the desc prop and remove the (broken)
                  *   vocab word.
                  */
-                name = nowName.findReplace(brokenPrefix, '', ReplaceOnce);
+                if(!replaceName)
+                    name = nowName.findReplace(brokenPrefix, '', ReplaceOnce);
+                else
+                    name = oldName_;
                 setMethod(&desc, standardDesc);
                 cmdDict.removeWord(self, brokenVocab, &adjective);
             }
@@ -421,12 +437,8 @@ class Breakable : object
      *   By default, we define any action that defines us as the indirect object
      *   as unfit for us to use, as we're broken. Customize this at will!
      */
-    beforeAction() {
-        if(gIobj == self && broken) {
-            gAction.setMessageParams('me', self);
-            "It doesn't work, as {the me/him} is <<brokenState>>.";
-            exit;
-        }
+    iobjFor(All) {
+        verify() { if(broken) illogicalNow('It doesn\'t work, as {the iobj/him} is <<brokenState>>.'); }
     }
     
 ;
@@ -511,7 +523,7 @@ class Burnable : Breakable
         brokenVocab = '(melted)';
         brokenState = 'melted';
         /* After we set out variables, reset our vocab and name. */
-        name = nowName.findReplace('(burnt) ', '', ReplaceOnce);
+        name = name.findReplace('(burnt) ', '', ReplaceOnce);
         cmdDict.removeWord(self, '(burnt)', &adjective);
         /* Finally, run our break function. */
         makeBroken(true);
@@ -578,6 +590,175 @@ class ActorScript : RunningScript
     run(actor, isDaemon) { }
     run_() { run(targetActor, true); }
 ;
+
+/* ---------------------------------------------------------------------- */
+// Common Rooms
+
+modify Thing
+    isInitialized = nil
+    initializeThing() {
+        inherited();
+        isInitialized = true;
+    }
+;
+
+modify Room
+    /* 
+     *   The default east location. Just change east like you normally do --
+     *   completely backwards compatible. Don't worry about breaking things at
+     *   all. You can even change [direction]Connector without messing anything
+     *   up.
+     */
+    east = nil
+    /* 
+     *   [direction]Connector is the connector in which your direction will
+     *   point to. Usually we use this for our door, but you can set it to
+     *   whatever you want. Be wary, if you set createDoors we won't
+     *   automatically connect this for you.
+     */
+    eastConnector = nil
+    /* 
+     *   [direction]DirLoc stands for [direction]DirectionLocation. It basically
+     *   states where your door will point to. By default, we assume you abide
+     *   by the rules of physics and an east door lies to the west in it's
+     *   adjacent room. If, however, you want to create some weird rooms that
+     *   aren't exactly circular, set this to where your linked door will be, so
+     *   a door won't be open on one side and closed on the other. (That would
+     *   be REALLY trippy!)
+     */
+    eastDirLoc = 'west'
+    
+    west = nil
+    westConnector = nil
+    westDirLoc = 'east'
+    
+    north = nil
+    northConnector = nil
+    northDirLoc = 'south'
+    
+    south = nil
+    southConnector = nil
+    southDirLoc = 'north'
+    
+    /* 
+     *   Our flag to let us know whether or not to create the doors. Setting
+     *   [direction]Connector = nil won't work -- only using this you can
+     *   disable auto-door creation.
+     */
+    createDoors = true
+    
+    /* 
+     *   We need to create our doors BEFORE this room initializes it's position
+     *   in space, and only if createDoors is true.
+     */
+    initializeThing() {
+        /* Is our createDoors flag true? */
+        if(createDoors == true) {
+            /* 
+             *   It is, so start by initialize our temporary door, one for each
+             *   Room.
+             */
+            local testDoor = perInstance(new Door());
+            /* 
+             *   Only create a new door if we aren't already using a connector,
+             *   and if we have a location to go to.
+             */
+            if(eastConnector == nil && east != nil) {
+                /* 
+                 *   We are using a connector and we have a location, so start
+                 *   by seeing whether or not our location is initialized -- if
+                 *   so, we must be the second in the chain, so set our
+                 *   masterObject to our [direction]DirLoc.
+                 */
+                if(east.isInitialized) { 
+                    switch(eastDirLoc) {
+                        case 'north': testDoor.masterObject = east.northConnector; break; 
+                        case 'south': testDoor.masterObject = east.southConnector; break;
+                        case 'west': testDoor.masterObject = east.westConnector; break;
+                        case 'east': testDoor.masterObject = east.eastConnector; break;
+                        default: testDoor.masterObject = east.southConnector;
+                    }
+                }
+                /* Do some standard Door creation stuff. */
+                testDoor.name = 'East Door';
+                testDoor.initializeVocabWith('east door');
+                testDoor.setMethod(&desc, {: "This door lies to the east. <.p>"});
+                /* 
+                 *   We move the test door into ourselves to make sure ... I'm
+                 *   actually not sure why I have to do this. But I do, so...
+                 */
+                testDoor.moveInto(self);
+                /* 
+                 *   Finally, set our connector to our door we created and set
+                 *   our location to our connector, getting rid of whatever room
+                 *   you put in there.
+                 */
+                eastConnector = testDoor;
+            }
+            east = eastConnector;
+            
+            /* Do the same for every other direction. */
+            if(westConnector == nil && west != nil) {
+                if(west.isInitialized) { 
+                    switch(westDirLoc) {
+                        case 'north': testDoor.masterObject = west.northConnector; break; 
+                        case 'south': testDoor.masterObject = west.southConnector; break;
+                        case 'west': testDoor.masterObject = west.westConnector; break;
+                        case 'east': testDoor.masterObject = west.eastConnector; break;
+                        default: testDoor.masterObject = west.southConnector;
+                    }
+                }
+                testDoor.name = 'West Door';
+                testDoor.initializeVocabWith('west door');
+                testDoor.setMethod(&desc, {: "This door lies to the west. <.p>"});
+                testDoor.moveInto(self);
+                westConnector = testDoor;
+            }
+            west = westConnector;
+            
+            if(northConnector == nil && north != nil) {
+                if(north.isInitialized) { 
+                    switch(northDirLoc) {
+                        case 'north': testDoor.masterObject = north.northConnector; break; 
+                        case 'south': testDoor.masterObject = north.southConnector; break;
+                        case 'west': testDoor.masterObject = north.westConnector; break;
+                        case 'east': testDoor.masterObject = north.eastConnector; break;
+                        default: testDoor.masterObject = north.southConnector;
+                    }
+                }
+                testDoor.name = 'North Door';
+                testDoor.initializeVocabWith('north door');
+                testDoor.setMethod(&desc, {: "This door lies to the north. <.p>"});
+                testDoor.moveInto(self);
+                northConnector = testDoor;
+            }
+            north = northConnector;
+            
+            if(southConnector == nil && south != nil) {
+                if(south.isInitialized) { 
+                    switch(southDirLoc) {
+                        case 'north': testDoor.masterObject = south.northConnector; break; 
+                        case 'south': testDoor.masterObject = south.southConnector; break;
+                        case 'west': testDoor.masterObject = south.westConnector; break;
+                        case 'east': testDoor.masterObject = south.eastConnector; break;
+                        default: testDoor.masterObject = south.southConnector;
+                    }
+                }
+                testDoor.name = 'South Door';
+                testDoor.initializeVocabWith('south door');
+                testDoor.setMethod(&desc, {: "This door lies to the south. <.p>"});
+                testDoor.moveInto(self);
+                southConnector = testDoor;
+            }
+        }
+        south = southConnector;
+        
+        inherited();
+    }
+;
+
+
+
 
 
 /* ---------------------------------------------------------------------- */
