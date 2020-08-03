@@ -1,6 +1,6 @@
-# Basic Library
+# AdventEX
 
-> An intuitive TADS 3 extension
+> An intuitive Adv3 extension
 
 
 [![Build Status](http://img.shields.io/travis/badges/badgerbadgerbadger.svg?style=flat-square)](https://travis-ci.org/badges/badgerbadgerbadger) [![Coverage Status](http://img.shields.io/coveralls/badges/badgerbadgerbadger.svg?style=flat-square)](https://coveralls.io/r/badges/badgerbadgerbadger) [![Gem Version](http://img.shields.io/gem/v/badgerbadgerbadger.svg?style=flat-square)](https://rubygems.org/gems/badgerbadgerbadger) [![License](http://img.shields.io/:license-mit-blue.svg?style=flat-square)](http://badges.mit-license.org) [![Badges](http://img.shields.io/:badges-9/9-ff6799.svg?style=flat-square)](https://github.com/badges/badgerbadgerbadger)
@@ -71,7 +71,7 @@ Go to https://intfiction.org/t/interesting-idea-easier-tads-library-for-new-user
     - 🍴 Fork this repo!
 
 - **Option 2**
-    - 👯 Clone this repo to your local machine using `https://github.com/Th3OneAndOnly/Basic-Lib.git`
+    - 👯 Clone this repo to your local machine using `https://github.com/Th3OneAndOnly/AdventEX.git`
 
 ### Step 2
 
@@ -79,7 +79,7 @@ Go to https://intfiction.org/t/interesting-idea-easier-tads-library-for-new-user
 
 ### Step 3
 
-- 🔃 Create a new pull request using <a href="https://github.com/Th3OneAndOnly/Basic-Lib/compare/" target="_blank">`https://github.com/joanaz/HireDot2/compare/`</a>.
+- 🔃 Create a new pull request using <a href="https://github.com/Th3OneAndOnly/AdventEX/compare/" target="_blank">`https://github.com/Th3OneAndOnly/AdventEX/compare/`</a>.
 
 ---
 
@@ -96,8 +96,5 @@ Check out my Linktree! https://linktr.ee/209TheOneAndOnly
 ---
 
 ## License
-
-[![License](http://img.shields.io/:license-mit-blue.svg?style=flat-square)](http://badges.mit-license.org)
-
-- **[MIT license](http://opensource.org/licenses/mit-license.php)**
-- Copyright 2015 © <a href="http://fvcproductions.com" target="_blank">Th3OneAndOnly</a>.
+- <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
+- Copyright 2020 © <a href="https://linktr.ee/209TheOneAndOnly" target="_blank">Th3OneAndOnly</a>.
