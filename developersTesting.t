@@ -2,6 +2,12 @@
 #include <adv3.h>
 #include <en_us.h>
 
+#ifdef __DEBUG
+    #define dbgNoun(x) vocabWords = x
+#else
+    #define dbgNoun(x)
+#endif
+
 
 versionInfo: GameID
     IFID = 'bfb43744-7f25-4149-99f0-d7d22305281d'
@@ -24,8 +30,17 @@ me : Actor
     location = startRoom
 ;
 
+newRoom : Room 'New Room' 'the new room'
+    "It's new!"
+    north = startRoom
+    dbgNoun('New Room')
+;
+
 startRoom: Room 'Start Room'
     "This is the starting room. "
+    north = newRoom
+    northDirLoc = 'north'
+    dbgNoun('Start Room')
 ;
 
 + table : Table, Heavy 'old first table' 'first table'
