@@ -67,17 +67,17 @@ class ComplexRearSurface : ComplexComponent, RearSurface
         }
     }
 ;
-/* We don't mess with Containers as they define most things we need anyway. */
+/* We don't mess with Containers as they define all things we need anyway. */
 class ComplexInnerContainer : ComplexComponent, Container
 ;
 class RestrictInnerContainer : ComplexComponent, RestrictedContainer
 ;
 
 /* 
- *   This is not meant for authors to use in their code -- it's simply a
- *   convenience class I made for the context of this extension.
+ *   We modify the ComplexContainer to include these values so I don't have to
+ *   write them -- they won't work in your code unless you use GeneralBox.
  */
-class ComplexObj_ : ComplexContainer
+modify ComplexContainer
     allowBehind(obj) { return true; }
     allowOn(obj) { return true; }
     allowUnder(obj) { return true; }
@@ -85,14 +85,13 @@ class ComplexObj_ : ComplexContainer
     failBehindMsg = 'You can\'t put that behind there.'
     failUnderMsg = 'You can\'t put that under there.'
 ;
-    
 
 
 
 /*
  *   A basic Table, where you can put stuff on and under.
  */
-class Table : ComplexObj_
+class Table : ComplexContainer
     /* 
      *   Define our subSurface and subUnderside as perInstance objects
      */
@@ -119,9 +118,9 @@ class Table : ComplexObj_
 
 /* 
  *   A Cabinet is an object where you can put stuff under, behind, or in, but
- *   it's too high to put stuff on it.
+ *   is generally too high to put stuff on it.
  */
-class Cabinet : ComplexObj_
+class Cabinet : ComplexContainer
     subRear = perInstance(new ComplexRearContainer())
     subUnderside = perInstance(new ComplexUnderside())
     subContainer = perInstance(new ComplexInnerContainer())
@@ -141,7 +140,7 @@ class Cabinet : ComplexObj_
  *   A TallTable refers to an object where it's too tall (or inaccessible) to
  *   put things on top, but you can place things below or behind.
  */
-class TallTable : ComplexObj_
+class TallTable : ComplexContainer
     subRear = perInstance(new ComplexRearContainer())
     subUnderside = perInstance(new ComplexUnderside())
     initializeThing() {
@@ -158,7 +157,7 @@ class TallTable : ComplexObj_
  *   FloorCabinet - An object that allows things in, on, or behind, but not
  *   under.
  */
-class FloorCabinet : ComplexObj_
+class FloorCabinet : ComplexContainer
     subRear = perInstance(new ComplexRearContainer())
     subContainer = perInstance(new ComplexInnerContainer())
     subSurface = perInstance(new ComplexSurface())
@@ -180,8 +179,8 @@ class FloorCabinet : ComplexObj_
  *   useful for many situations where you want to define a custom object like a
  *   print scanner, or something else.
  */
-class GeneralBox : ComplexObj_
-    /* This is standard */
+class GeneralBox : ComplexContainer
+    /* This is standard, like the specialized furniture objects above. */
     subRear = perInstance(new ComplexRearContainer())
     subUnderside = perInstance(new ComplexUnderside())
     subContainer = perInstance(new ComplexInnerContainer())
@@ -229,7 +228,7 @@ class RestrictedBox : GeneralBox
 
 /* 
  *   A Sofa is a Chair that can hold multiple actors, but only a specified
- *   amount. A little niche, sure.
+ *   amount. A little niche, sure. But useful in some cases.
  */
 class Sofa : Chair
     maxActors = 3
@@ -249,9 +248,10 @@ class Sofa : Chair
 // EXTRA CLASSES CODE
 
 /* 
- *   Give everything a self_ tag just in case you want to loop over every
- *   object, and it may or may not be a transformer, using obj.self_ still
- *   works.
+ *   For the Transformable -
+ *.      Give everything a self_ tag just in case you want to loop over every
+ *.      object, and it may or may not be a Transformable, using obj.self_ still
+ *.      works.
  */
 modify Object
     self_ = self
@@ -269,8 +269,9 @@ class Transformable : object
      */
     transformed = nil
     /* 
-     *   The reference object is an object that DOES NOT exist in the world, is
-     *   moved into nil then replaces this object when transformed. 
+     *   The reference object is an object that DOES NOT exists in the world, is
+     *   moved into nil then replaces this object when transformed. You can use
+     *   an anonymous object, or reference another.
      */
     referenceObj = nil
     /* 
@@ -348,22 +349,23 @@ class Breakable : object
      *   This is the little bit tacked on the end of the description when
      *   broken. DOUBLE QUOTES! P. S.: If you change your desc property, ALWAYS
      *   call updateStandardDesc() or it will be LOST upon breaking or fixing.
+     *   Setting this to a function doesn't work well.
      */
     brokenDesc = "<.p>It\'s broken."
     /* 
      *   This is the prefix that goes on the beginning of the name of the object
-     *   when broken.
+     *   when broken. Setting this to a function doesn't work well.
      */
     brokenPrefix = '(broken) '
     /* 
-     *   The vocab word added as an adjective when it's broken. Not particularly
-     *   meant for author use, as setting this wrong might lead to F U N K Y
-     *   results.
+     *   The vocab word added as an adjective when it's broken. Be careful when
+     *   changing this, if you do. Setting this to a function doesn't work well.
      */
     brokenVocab = '(broken)'
     /* 
      *   Used for stating stuff like 'the object is broken'. Change this if
-     *   you're using broken differently.
+     *   you're using broken differently. Setting this to a function doesn't
+     *   work well.
      */
     brokenState = 'broken'
     /* Used to store name if needed. */
@@ -374,7 +376,7 @@ class Breakable : object
         inherited();
     }
     /* 
-     *   The standard function for making an object broken of fixed. Use
+     *   The standard function for making an object broken or fixed. Use
      *   makeBroken(true) to break it, and makeBroken(nil) to fix it.
      */
     makeBroken(state) {
@@ -466,13 +468,19 @@ class Freezeable : Breakable
 ;
 
 /* 
- *   A Burnable object is like Freexeable, but if you define it as melted, and
- *   melt() it, it will become COMPLETEY unusable, as in melted beyond repair.
+ *   A Burnable object is like Freexeable, but if you melt() it, it will become
+ *   COMPLETEY unusable, as in melted beyond repair.
  */
 class Burnable : Breakable
-    /* Check whether we HAVE a melted prop and if we're melted. */
-    isMelted = (propDefined(&melted) && melted)
-    /* These all define their props by whether it's melted or not. */
+    /* 
+     *   DON'T change this directly, only use this conditionally statements. Use
+     *   melt() instead.
+     */
+    melted = nil
+    /* 
+     *   Our standard burn props to replace broken. These will be changed to
+     *   melted later, upon melting.
+     */
     brokenDesc = "<.p>It's melted."
     
     brokenPrefix = '(burnt) '
@@ -480,7 +488,7 @@ class Burnable : Breakable
     brokenVocab = '(burnt)'
     
     brokenState = 'burnt'
-    /* Set our burnt and makeBurnt() to out counterparts... */
+    /* Set our burnt and makeBurnt() to our counterparts... */
     burnt = broken
     
     makeBurnt(state) { makeBroken(state); }
@@ -495,7 +503,7 @@ class Burnable : Breakable
          *   is intended to be permament.
          */
         local nowName = name;
-        if(isMelted) {
+        if(melted) {
             name = brokenPrefix + nowName;
             setMethod(&desc, {: "<<brokenDesc()>>" });
             cmdDict.addWord(self, brokenVocab, &adjective);
@@ -509,13 +517,10 @@ class Burnable : Breakable
      *   melted objects are completely useless. If not, treat it as normal.
      */
     beforeAction() {
-        if(isMelted && (gDobj == self || gIobj == self)) { "It's completely melted. Useless!"; exit; }
+        if(melted && (gDobj == self || gIobj == self)) { "It's completely melted. Useless!"; exit; }
         inherited();
     }
-    /* 
-     *   melt() is like makeburnt while melted is true, but using it this way is
-     *   permanently, usually.
-     */
+    /* Use this to melt your object, making it useless. */
     melt() {
         /* We set everything to it's melted variant. */
         melted = true;
@@ -534,9 +539,9 @@ class Burnable : Breakable
 
 /* 
  *   This is purely made for RunningScripts, but I guess you can hook into
- *   globalTurn and do some stuff.
+ *   globalScript and do some stuff.
  */
-globalTurn : Thing
+globalScript : Thing
     /* 
      *   For each RunningScript, if it has a runEvery property, set it's new
      *   Daemon. If not, set it's Daemon to nil.
@@ -550,9 +555,9 @@ globalTurn : Thing
  *   Wash & repeat! A RunningScript is a script that runs. Override it's run()
  *   property. It does NOT allow parameters passed into it. You CAN set
  *   'runEvery' to something other than nil to make it run every amount of
- *   turns. When running, you usually set 'nil' if you run it manually, because
- *   it is not being run by the daemon. Internally, this has no effect. But it
- *   might affect whatever code you write in there.
+ *   turns. When running, you usually set it to 'nil' if you run it manually,
+ *   because it is not being run by the daemon. Internally, this has no effect.
+ *   But it might affect whatever code you write in there.
  */
 class RunningScript : object
     /* 
@@ -592,8 +597,12 @@ class ActorScript : RunningScript
 ;
 
 /* ---------------------------------------------------------------------- */
-// Common Rooms
+// Common Code for Rooms
 
+/* 
+ *   isInitialized is a useful conditional statement used to determine whether
+ *   something is initialized yet or not. It is set AFTER it is finished initializing.
+ */
 modify Thing
     isInitialized = nil
     initializeThing() {
@@ -604,21 +613,20 @@ modify Thing
 
 modify Room
     /* 
-     *   The default east location. Just change east like you normally do --
+     *   The default east location. Just use east like you normally do --
      *   completely backwards compatible. Don't worry about breaking things at
-     *   all. You can even change [direction]Connector without messing anything
-     *   up.
+     *   all. You can even change eastConnector without messing anything up.
      */
     east = nil
     /* 
-     *   [direction]Connector is the connector in which your direction will
+     *   eastConnector is the connector in which your direction will
      *   point to. Usually we use this for our door, but you can set it to
      *   whatever you want. Be wary, if you set createDoors we won't
      *   automatically connect this for you.
      */
     eastConnector = nil
     /* 
-     *   [direction]DirLoc stands for [direction]DirectionLocation. It basically
+     *   eastDirLoc stands for eastDirectionLocation. It basically
      *   states where your door will point to. By default, we assume you abide
      *   by the rules of physics and an east door lies to the west in it's
      *   adjacent room. If, however, you want to create some weird rooms that
@@ -627,6 +635,11 @@ modify Room
      *   be REALLY trippy!)
      */
     eastDirLoc = 'west'
+    
+    /* 
+     *   Of course, every thing I said up above applies to the other directions
+     *   below.
+     */
     
     west = nil
     westConnector = nil
@@ -642,7 +655,7 @@ modify Room
     
     /* 
      *   Our flag to let us know whether or not to create the doors. Setting
-     *   [direction]Connector = nil won't work -- only using this you can
+     *   eastConnector = nil won't work -- only using this can you
      *   disable auto-door creation.
      */
     createDoors = true
@@ -668,7 +681,9 @@ modify Room
                  *   We are using a connector and we have a location, so start
                  *   by seeing whether or not our location is initialized -- if
                  *   so, we must be the second in the chain, so set our
-                 *   masterObject to our [direction]DirLoc.
+                 *   masterObject to our eastDirLoc. Note it doesn't matter in
+                 *   which order it happens -- like Door objects are,
+                 *   masterObject is arbitrary.
                  */
                 if(east.isInitialized) { 
                     switch(eastDirLoc) {
@@ -750,29 +765,10 @@ modify Room
                 testDoor.moveInto(self);
                 southConnector = testDoor;
             }
+            south = southConnector;
         }
-        south = southConnector;
         
+        /* Now call our inherited biz */
         inherited();
     }
 ;
-
-
-
-
-
-/* ---------------------------------------------------------------------- */
-// Knowledge
-
-
-
-
-
-
-
-
-
-
-
-
-
