@@ -39,7 +39,7 @@
 
 ### Clone
 
-- Clone this repo to your local machine using `https://github.com/Th3OneAndOnly/Basic-Lib`
+- Clone this repo to your local machine using `https://github.com/Th3OneAndOnly/AdventEX`
 
 ---
 
