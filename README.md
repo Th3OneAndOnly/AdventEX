@@ -49,7 +49,7 @@
 + A couple ease-of-use classes that make more niche-tasks possible. Such as:
   + Transformable & Breakable classes
   + RunningScripts
-+ Much more! (Check the README.txt)
++ Much more! (Check the wiki)
 
 Go to https://intfiction.org/t/interesting-idea-easier-tads-library-for-new-users/46309 to contribute to the community and add your ideas!
 
