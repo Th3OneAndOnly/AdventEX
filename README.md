@@ -20,7 +20,7 @@
 
 ## Example of use:
 
-[Here's a demo!](https://github.com/Th3OneAndOnly/Basic-Lib/blob/master/BasicLibrary.t)
+[Here's a demo!](https://github.com/Th3OneAndOnly/Basic-Lib/blob/master/developrsTesting.t)
 
 ```
 + table : Table 'table' 'table'
